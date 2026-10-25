@@ -1,0 +1,50 @@
+{
+  "name": "trae-wsl",
+  "version": "0.1.0",
+  "description": "Fix Trae CN's \"connect to WSL\" failure when your Linux default shell is fish: patches the bundled remote-ssh heredoc deploy (exit 127) instead of your shell.",
+  "keywords": [
+    "trae",
+    "trae-cn",
+    "wsl",
+    "fish",
+    "remote-wsl",
+    "patch",
+    "exit-127",
+    "cli"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "trae-wsl": "dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "build": "tsdown && node scripts/postbuild.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsdown": "^0.23.0",
+    "typescript": "^5.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Loongphy/trae-wsl.git"
+  },
+  "author": "Loong",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/Loongphy/trae-wsl/issues"
+  },
+  "homepage": "https://github.com/Loongphy/trae-wsl#readme"
+}

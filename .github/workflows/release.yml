@@ -1,0 +1,52 @@
+name: release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - name: version sanity
+        run: |
+          set -euo pipefail
+          pkg=$(node -p "require('./package.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_EVENT_NAME" = "release" ] && [ "$pkg" != "$tag" ]; then
+            echo "package.json=$pkg 与 tag=$tag 不一致" >&2
+            exit 1
+          fi
+          echo "publishing trae-wsl@$pkg from $GITHUB_REF_NAME ($GITHUB_EVENT_NAME)"
+      - name: skip if already published
+        id: check
+        run: |
+          pkg=$(node -p "require('./package.json').version")
+          if npm view "trae-wsl@$pkg" version >/dev/null 2>&1; then
+            echo exists=true >> "$GITHUB_OUTPUT"
+          else
+            echo exists=false >> "$GITHUB_OUTPUT"
+          fi
+      - name: publish
+        if: steps.check.outputs.exists == 'false'
+        run: npm publish --provenance --access public
+      - name: verify
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          pkg=$(node -p "require('./package.json').version")
+          npm view "trae-wsl@$pkg" version
+          npm view "trae-wsl@$pkg" dist.attestations --json || true
